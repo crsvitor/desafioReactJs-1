@@ -1,43 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import api from './services/api';
+import React, { useState, useEffect } from "react";
+import api from "./services/api";
 
-import './App.css';
-
-import Header from './components/Header';
+import "./styles.css";
 
 function App() {
-  const [projects, setProjects] = useState([]);
+  const [repositories, setRepositories] = useState([]);
 
   useEffect(() => {
-    api.get('projects').then(response => {
-      setProjects(response.data);
+    api.get('repositories').then(response => {
+      setRepositories(response.data);
     });
   }, []);
 
-  async function handleAddProject() {
-    // setProjects([...projects, `Novo projeto ${Date.now()}`]);
-
-    const response = await api.post('projects', {
-      title: `Novo projeto ${Date.now()}`,
-      owner: "Vitor"
+  async function handleAddRepository() {
+    const response = await api.post('repositories', {
+      title: `React ${Date.now()}`,
+      url: `https://github.com/crsvitor`,
+      techs: `[React, React Native, Node]`
     });
 
-    const project = response.data;
+    const repository = response.data;
 
-    setProjects([...projects, project]);
+    setRepositories([...repositories, repository]);
   }
 
-  return (
-    <>
-    <Header title="Projects" />
-    
-    <ul>
-      {projects.map(project => <li key={project.id}>{project.title}</li>)}
-    </ul>
+  async function handleRemoveRepository(id) {
+    await api.delete(`repositories/${id}`);
 
-    <button type="button" onClick={handleAddProject}>Adicionar projeto</button>
-    </>
-  )
+    // const repositoryIndex = repositories.findIndex(repository => repository.id === id);
+    
+    // repositories.splice(repositoryIndex, 1);
+    
+    // setRepositories([...repositories]);
+    
+    setRepositories(repositories.filter(
+      repository => repository.id !== id
+      ));
+    }
+
+  return (
+    <div>
+      <ul data-testid="repository-list">
+        {repositories.map(repository => (
+          <li key={repository.id} >
+            {repository.title}
+            <button onClick={() => handleRemoveRepository(repository.id)}>
+              Remover
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <button onClick={handleAddRepository}>Adicionar</button>
+    </div>
+  );
 }
 
 export default App;
